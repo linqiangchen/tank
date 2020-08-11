@@ -162,7 +162,7 @@
                     if (parseInt(this.x / 40) == parseInt(item.offsetLeft / 40) && parseInt(this.y / 40) ==
                         parseInt(item.offsetTop / 40)) {
                         this.ele.remove();
-                        $(item).remove();
+                        // $(item).remove();//控制wall是否能被子弹消灭
                         clearInterval(this.timer);
                     }
                 })
