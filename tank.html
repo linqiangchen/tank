@@ -77,13 +77,16 @@
             <img src="./image/坦克.jpg" alt="">
         </div>
     </div>
-    <script src="./js/tool.js"></script>
     <script src="./js/jquery.js"></script>
     <script>
         let tag = false;
+        let timer = 0;
+        function randomInt(min, max) { //产生[min,max]范围内的整数
+            return Math.round(Math.random() * (max - min)) + min;
+        }
         class Wall {
             constructor() {
-                this.init()
+                this.init();
             }
             init() {
                 this.col = [];
@@ -93,18 +96,16 @@
                     this.row.push(i);
                 };
                 for (var i = 0; i < 14; i++) {
-
-                    let rowIndex = randomInt(0, this.row.length - 1)
-                    let colIndex = randomInt(0, this.col.length - 1)
-                    $(`<div class="wall" style="top:${this.row[rowIndex]*40}px; left:${this.col[colIndex]*40}px"></div>`)
-                        .appendTo('.wrap');
+                    let rowIndex = randomInt(0, this.row.length - 1);
+                    let colIndex = randomInt(0, this.col.length - 1);
+                    $(`<div class="wall" style="top:${this.row[rowIndex]*40}px; left:${this.col[colIndex]*40}px"></div>`).appendTo('.wrap');
                     this.row.splice(rowIndex, 1);
                     this.col.splice(colIndex, 1);
                 };
             }
         }
-        let wall = new Wall()
-        let wallArr = [...$('.wall')]
+        let wall = new Wall();
+        let wallArr = [...$('.wall')];
         class Bullet {
             constructor(x, y, direction, target) {
                 this.init(x, y, direction, target);
@@ -113,15 +114,15 @@
                 this.x = x;
                 this.y = y;
                 this.direction = direction;
-                this.ele = $('<span></span>')
-                this.initBullet();
-
+                this.ele = $('<span></span>');
                 this.wrap = $('.wrap');
-                this.target = target
+                this.target = target;
+                this.timer = null;
+                this.initBullet();
             }
             initBullet() { //初始化子弹坐标
                 if (tag) {
-                    return
+                    return;
                 }
                 this.ele.css('left', this.x + 'px');
                 this.ele.css('top', this.y + 'px');
@@ -130,7 +131,7 @@
             }
             move() { //子弹移动
                 if (tag) {
-                    return
+                    return;
                 }
                 this.timer = setInterval(() => {
                     switch (this.direction) {
@@ -149,13 +150,13 @@
                     }
                     if (tag) {
                         clearInterval(this.timer);
-                        return
+                        return;
                     }
                     this.collision()
                     this.edge();
                     this.ele.css('left', this.x + 'px');
                     this.ele.css('top', this.y + 'px');
-                }, 20)
+                }, 20);
             }
             edge() { //边缘检测
                 if (this.x <= 0 || this.y <= 0 || (this.x >= this.wrap.width() - 10) || (this.y >= this.wrap
@@ -168,11 +169,10 @@
             collision() { //碰撞检测
                 // 
                 wallArr.forEach(item => {
-
                     if (parseInt(this.x / 40) == parseInt(item.offsetLeft / 40) && parseInt(this.y / 40) ==
                         parseInt(item.offsetTop / 40)) {
                         this.ele.remove();
-                        $(item).remove()
+                        $(item).remove();
                         clearInterval(this.timer);
                     }
                 })
@@ -195,13 +195,12 @@
             }
             init(myKeyCode) { //初始化坦克
                 this.keyDown(myKeyCode);
-                this.x = this.tank[0].offsetLeft;  
+                this.x = this.tank[0].offsetLeft;
                 this.y = this.tank[0].offsetTop;
                 this.wrap = $('.wrap');
                 this.direction = 'top';
                 this.fire(myKeyCode);
                 this.target = this.tank.siblings('.tan')[0];
-
             }
             keyDown(myKeyCode) { //绑定移动事件，控制方向
                 var that = this
@@ -226,41 +225,40 @@
                 })
             }
             move() { //根据方向移动坦克，调整坦克方向
-                if(this.check()){
+                if (this.check()) {
                     return
                 }
                 switch (this.direction) {
                     case 'top':
                         this.y -= 40;
-                        this.y =  this.check()?this.y+40:this.y
+                        this.y = this.check() ? this.y + 40 : this.y
                         this.tank.css('transform', 'rotateZ(0deg)')
                         break;
                     case 'left':
                         this.x -= 40;
-                        this.x =  this.check()?this.x+40:this.x
+                        this.x = this.check() ? this.x + 40 : this.x
                         this.tank.css('transform', 'rotateZ(-90deg)')
                         break;
                     case 'right':
                         this.x += 40;
-                        this.x =  this.check()?this.x-40:this.x
+                        this.x = this.check() ? this.x - 40 : this.x
                         this.tank.css('transform', 'rotateZ(90deg)')
                         break;
                     case 'bottom':
                         this.y += 40;
-                        this.y =  this.check()?this.y-40:this.y
+                        this.y = this.check() ? this.y - 40 : this.y
                         this.tank.css('transform', 'rotateZ(180deg)')
                         break;
                 }
                 this.edge();
                 this.check();
-                
                 this.tank.css('left', this.x + 'px');
                 this.tank.css('top', this.y + 'px');
             }
             check() {
-               return wallArr.some(item => (Math.ceil(this.x / 40) === Math.ceil(item.offsetLeft / 40) && Math.ceil(this.y / 40) ===
-                        Math.ceil(item.offsetTop / 40))
-                )
+                return wallArr.some(item => (Math.ceil(this.x / 40) === Math.ceil(item.offsetLeft / 40) && Math
+                    .ceil(this.y / 40) ===
+                    Math.ceil(item.offsetTop / 40)))
             }
             edge() { //边缘检测
                 if (this.x <= 0) {
@@ -279,7 +277,6 @@
             fire(myKeyCode) { //开火
                 var that = this
                 $(document).keyup(function (e) {
-
                     if (e.keyCode === myKeyCode.send) {
                         switch (that.direction) {
                             case 'top':
@@ -298,27 +295,26 @@
                     }
                     return
                 })
-
             }
         }
         $(document).on('mousemove', function (e) {
             e.preventDefault()
         })
-            new Tank($('.blue'), {
-                top: 87,
-                right: 68,
-                bottom: 83,
-                left: 65,
-                send: 69
-            })
-            new Tank($('.red'), {
-                top: 38,
-                right: 39,
-                bottom: 40,
-                left: 37,
-                send: 96
-            })
-            alert(`蓝色方：W,D,S,A分别对应上右下左，E发射子弹  
+        new Tank($('.blue'), {
+            top: 87,
+            right: 68,
+            bottom: 83,
+            left: 65,
+            send: 69
+        })
+        new Tank($('.red'), {
+            top: 38,
+            right: 39,
+            bottom: 40,
+            left: 37,
+            send: 96
+        })
+        alert(`蓝色方：W,D,S,A分别对应上右下左，E发射子弹  
 红色方：方向键控制方向，数字小键盘0发射子弹`)
     </script>
 </body>
